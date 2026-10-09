@@ -1,0 +1,71 @@
+{
+  "name": "mini-sonner",
+  "version": "1.0.0",
+  "description": "Lightweight, customizable React toast notification library written in TypeScript.",
+  "keywords": [
+    "sonner",
+    "react",
+    "toast",
+    "notification",
+    "mini-sonner",
+    "typescript",
+    "toast-notification",
+    "react-toast"
+  ],
+  "packageManager": "pnpm@9.0.0",
+  "homepage": "https://github.com/pickatoz/Mini-Sonner#readme",
+  "bugs": {
+    "url": "https://github.com/pickatoz/Mini-Sonner/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pickatoz/Mini-Sonner.git"
+  },
+  "license": "MIT",
+  "author": "Pickatoz",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "prepublishOnly": "npm run build",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\""
+  },
+  "peerDependencies": {
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
+    "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.2",
+    "@rollup/plugin-node-resolve": "^15.3.0",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@types/node": "^22.10.10",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "postcss": "^8.5.1",
+    "prettier": "^3.4.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "rollup": "^4.31.0",
+    "rollup-plugin-dts": "^6.1.1",
+    "rollup-plugin-postcss": "^4.0.2",
+    "tslib": "^2.8.0",
+    "typescript": "^5.7.3"
+  }
+}
