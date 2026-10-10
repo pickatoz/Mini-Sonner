@@ -25,6 +25,7 @@ export interface ToastClassNames {
 
 export interface ToastOptions {
   id?: string | number;
+  message?: React.ReactNode;
   description?: React.ReactNode;
   icon?: React.ReactNode;
   hideIcon?: boolean;
@@ -64,6 +65,6 @@ export interface SonnerContainerProps {
 
 export type PromiseData<T = any> = {
   loading: React.ReactNode | ToastOptions;
-  success: React.ReactNode | ((data: T) => React.ReactNode | ToastOptions);
-  error: React.ReactNode | ((error: any) => React.ReactNode | ToastOptions);
+  success: React.ReactNode | ToastOptions | ((data: T) => React.ReactNode | ToastOptions);
+  error: React.ReactNode | ToastOptions | ((error: any) => React.ReactNode | ToastOptions);
 };
