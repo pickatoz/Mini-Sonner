@@ -188,6 +188,36 @@ describe("<ToastItem /> — with SonnerContainer (stateful)", () => {
     vi.useRealTimers();
   });
 
+  it("does not restart an existing toast timer when another toast is added", async () => {
+    vi.useFakeTimers();
+    const onAutoClose = vi.fn();
+    render(
+      <SonnerContainer autoClose={3000}>
+        <span>x</span>
+      </SonnerContainer>
+    );
+    act(() => {
+      sonner("first", { onAutoClose });
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(onAutoClose).not.toHaveBeenCalled();
+
+    // Adding a second toast re-renders the container.
+    act(() => {
+      sonner("second");
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(1000);
+    });
+    // The first toast must still dismiss on its original deadline.
+    expect(onAutoClose).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
+  });
+
   it("does not initiate drag when pointerdown originates on a button", () => {
     const onDismiss = vi.fn();
     render(

@@ -35,24 +35,29 @@ export const ToastItem: React.FC<ToastItemProps> = ({
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
   const currentOffsetRef = useRef({ x: 0, y: 0 });
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const startTimeRef = useRef<number>(Date.now());
-  const remainingTimeRef = useRef<number>(
-    typeof toast.autoClose === "number"
-      ? toast.autoClose
-      : typeof toast.duration === "number"
-        ? toast.duration
-        : typeof autoClose === "number"
-          ? autoClose
-          : 2500
-  );
-
   const effectiveAutoClose =
     toast.autoClose !== undefined
       ? toast.autoClose
       : toast.duration !== undefined
         ? toast.duration
         : autoClose;
+
+  // Keep a ref to the latest toast so the auto-dismiss callback never reads
+  // stale data, without having to depend on the (unstable) toast object.
+  const toastRef = useRef(toast);
+  useEffect(() => {
+    toastRef.current = toast;
+  });
+
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  // Absolute timestamp at which the toast must be dismissed while its timer is
+  // running, or null while the timer is paused.
+  const deadlineRef = useRef<number | null>(null);
+  // Time left over whenever the timer is paused (hover / swipe).
+  const remainingTimeRef = useRef<number>(
+    typeof effectiveAutoClose === "number" ? effectiveAutoClose : 2500
+  );
+  const lastAutoCloseRef = useRef<number | false>(effectiveAutoClose);
 
   const shouldHideIcon = toast.hideIcon ?? hideIcons;
   const shouldShowClose = toast.closeButton ?? closeButton;
@@ -68,31 +73,45 @@ export const ToastItem: React.FC<ToastItemProps> = ({
   useEffect(() => {
     if (effectiveAutoClose === false || effectiveAutoClose <= 0) return;
 
-    const startTimer = () => {
-      startTimeRef.current = Date.now();
-      timerRef.current = setTimeout(() => {
-        if (toast.onAutoClose) {
-          toast.onAutoClose(toast);
-        }
-        toastState.dismiss(toast.id);
-      }, remainingTimeRef.current);
-    };
+    // Only re-arm the full duration when the configured duration actually
+    // changes, so ordinary re-renders keep the original deadline.
+    if (lastAutoCloseRef.current !== effectiveAutoClose) {
+      lastAutoCloseRef.current = effectiveAutoClose;
+      deadlineRef.current = null;
+      remainingTimeRef.current =
+        typeof effectiveAutoClose === "number" ? effectiveAutoClose : 2500;
+    }
 
-    if ((pauseOnHover && isHovered) || isSwiping) {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-        remainingTimeRef.current -= Date.now() - startTimeRef.current;
+    const isPaused = (pauseOnHover && isHovered) || isSwiping;
+
+    if (isPaused) {
+      // Freeze the timer, remembering how much time is left.
+      if (deadlineRef.current !== null) {
+        remainingTimeRef.current = Math.max(0, deadlineRef.current - Date.now());
+        deadlineRef.current = null;
       }
     } else {
-      startTimer();
+      // Resume towards the original deadline instead of restarting from the
+      // full duration on every re-render.
+      if (deadlineRef.current === null) {
+        deadlineRef.current = Date.now() + remainingTimeRef.current;
+      }
+
+      const delay = Math.max(0, deadlineRef.current - Date.now());
+      timerRef.current = setTimeout(() => {
+        const current = toastRef.current;
+        current.onAutoClose?.(current);
+        toastState.dismiss(current.id);
+      }, delay);
     }
 
     return () => {
       if (timerRef.current) {
         clearTimeout(timerRef.current);
+        timerRef.current = null;
       }
     };
-  }, [effectiveAutoClose, isHovered, isSwiping, pauseOnHover, toast]);
+  }, [effectiveAutoClose, isHovered, isSwiping, pauseOnHover]);
 
   const handleDismiss = () => {
     toastState.dismiss(toast.id);
