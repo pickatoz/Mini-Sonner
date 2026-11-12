@@ -66,5 +66,6 @@ export interface SonnerContainerProps {
 export type PromiseData<T = any> = {
   loading: React.ReactNode | ToastOptions;
   success: React.ReactNode | ToastOptions | ((data: T) => React.ReactNode | ToastOptions);
-  error: React.ReactNode | ToastOptions | ((error: any) => React.ReactNode | ToastOptions);
+  error:
+    React.ReactNode | ToastOptions | ((error: any) => React.ReactNode | ToastOptions);
 };
