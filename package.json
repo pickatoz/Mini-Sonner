@@ -1,6 +1,6 @@
 {
   "name": "mini-sonner",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Lightweight, customizable React toast notification library written in TypeScript.",
   "keywords": [
     "sonner",
